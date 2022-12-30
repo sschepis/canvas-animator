@@ -1,4 +1,4 @@
-import { Vector3 } from './vector';
+import { Vector3, Vector2 } from './vector';
 
 export type animationFunc = (x: number, y: number, z: number) => number
 export type renderFunc = (context: CanvasRenderingContext2D, x: number, y: number, z: number, value: number, time: number) => boolean
@@ -95,4 +95,9 @@ export class Animator {
     stop() {
         this._stop = true
     }
+}
+
+export {
+    Vector3,
+    Vector2,
 }
