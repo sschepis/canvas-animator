@@ -1,9 +1,9 @@
 import { Vector3, Vector2 } from './vector';
 
-export type animationFunc = (x: number, y: number, z: number) => number
-export type renderFunc = (context: CanvasRenderingContext2D, x: number, y: number, z: number, value: number, time: number) => boolean
-export type animationStartFunc = () => animationFunc
-export class Bounds {
+type animationFunc = (x: number, y: number, z: number) => number
+type renderFunc = (context: CanvasRenderingContext2D, x: number, y: number, z: number, value: number, time: number) => boolean
+type animationStartFunc = () => animationFunc
+class Bounds {
     constructor(public min: Vector3, public max: Vector3) {}
 }
 const animatorFunc = (callback: any) => {
@@ -13,7 +13,7 @@ const animatorFunc = (callback: any) => {
         setTimeout(callback, 1000 / 60);
     }
 }
-export class Animator {
+class Animator {
     _stop: boolean = false;
     _canvas: any;
     _context: any;
@@ -100,4 +100,9 @@ export class Animator {
 export {
     Vector3,
     Vector2,
+    Animator,
+    Bounds,
+    animationFunc,
+    renderFunc,
+    animationStartFunc
 }

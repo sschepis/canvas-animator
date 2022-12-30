@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Vector2 = exports.Vector3 = exports.Animator = exports.Bounds = void 0;
+exports.Bounds = exports.Animator = exports.Vector2 = exports.Vector3 = void 0;
 const vector_1 = require("./vector");
 Object.defineProperty(exports, "Vector3", { enumerable: true, get: function () { return vector_1.Vector3; } });
 Object.defineProperty(exports, "Vector2", { enumerable: true, get: function () { return vector_1.Vector2; } });
