@@ -1,6 +1,6 @@
 {
   "name": "@sschepis/canvas-animator",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Animate canvases with ease",
   "directories": {
     "test": "test"

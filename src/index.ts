@@ -38,7 +38,7 @@ class Animator {
         let renderVal = false, frames = 0, _break = false;
         for(let x = bounds.min.x; x < bounds.max.x; x++) {
             for(let y = bounds.min.y; y < bounds.max.y; y++) {
-                for(let z = bounds.min.z; z < bounds.max.x; z++) {
+                for(let z = bounds.min.z; z < bounds.max.z; z++) {
                     const result = iteratorFunc(x, y, z)
                     renderVal = renderFunc(this._context, x, y, z, result, this._time);
                     frames++;
