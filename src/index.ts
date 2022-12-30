@@ -6,24 +6,33 @@ export type animationStartFunc = () => animationFunc
 export class Bounds {
     constructor(public min: Vector3, public max: Vector3) {}
 }
+const animatorFunc = (callback: any) => {
+    try {
+        requestAnimationFrame(callback);
+    } catch(e) {
+        setTimeout(callback, 1000 / 60);
+    }
+}
 export class Animator {
     _stop: boolean = false;
     _canvas: any;
     _context: any;
     _time: number = 0;
+    _cameraPosition: Vector3 = new Vector3(0, 0, 0)
+    _cameraDirection: Vector3 = new Vector3(0, 0, 0)
     constructor(
+        public document: any,
         canvas: string, 
         public bounds: Bounds, 
         public animation: animationStartFunc, 
         public renderFunc:renderFunc, 
         public randomCoords: boolean = false) {
-        this._canvas = document.getElementById(canvas) as HTMLCanvasElement;;
+        this._canvas = this.document.getElementById(canvas) as HTMLCanvasElement;;
         this._context = this._canvas.getContext('2d');
-        this._canvas.width = window.innerWidth;
-        this._canvas.height = window.innerHeight;
+        this._canvas.width = this.bounds.max.x - this.bounds.min.x;
+        this._canvas.height = this.bounds.max.y - this.bounds.min.y;
         if(this._context) this._context.translate(this._canvas.width / 2, this._canvas.height / 2);
         this.animate = this.animate.bind(this);
-        this.animate();
     }
     iterate(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount: number = 0) {
         let renderVal = false, frames = 0;
@@ -56,9 +65,9 @@ export class Animator {
         }
         return renderVal;
     }
-    animate(framesCount: number = 0) {
+    animate(caneraPosition: Vector3, caneraDirection: Vector3, framesCount: number = 0) {
         if(!this._context) {
-            if(!this._stop) requestAnimationFrame(this.animate)
+            if(!this._stop) animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount))
             return
         }
         const animation = this.animation()
@@ -66,6 +75,8 @@ export class Animator {
         const y = 0
         const z = 0 
         let renderVal = undefined
+        this._cameraPosition = caneraPosition
+        this._cameraDirection = caneraDirection
         if(this.randomCoords) renderVal = this.iterateRandom(
             this.bounds, 
             animation, 
@@ -74,7 +85,7 @@ export class Animator {
             this.bounds, 
             animation, 
             this.renderFunc)
-        if(!this._stop && !renderVal) requestAnimationFrame(this.animate)
+        if(!this._stop && !renderVal) animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount))
         this._time += 1
     }
     stop() {
