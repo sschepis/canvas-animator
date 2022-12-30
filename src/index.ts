@@ -72,7 +72,7 @@ class Animator {
         }
         return renderVal;
     }
-    animate(caneraPosition: Vector3, caneraDirection: Vector3, framesCount: number = 0) {
+    animate(caneraPosition: Vector3, caneraDirection: Vector3, framesCount: number = 0, loop: boolean = true) {
         if(!this._context) {
             if(!this._stop) animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount))
             return
@@ -89,7 +89,7 @@ class Animator {
             this.bounds, 
             animation, 
             this.renderFunc, framesCount)
-        if(!this._stop && !renderVal) animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount))
+        if(!this._stop && !renderVal && loop) animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount))
         this._time += 1
     }
     stop() {
