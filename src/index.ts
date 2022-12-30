@@ -35,18 +35,25 @@ export class Animator {
         this.animate = this.animate.bind(this);
     }
     iterate(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount: number = 0) {
-        let renderVal = false, frames = 0;
+        let renderVal = false, frames = 0, _break = false;
         for(let x = bounds.min.x; x < bounds.max.x; x++) {
             for(let y = bounds.min.y; y < bounds.max.y; y++) {
                 for(let z = bounds.min.z; z < bounds.max.x; z++) {
                     const result = iteratorFunc(x, y, z)
                     renderVal = renderFunc(this._context, x, y, z, result, this._time);
                     frames++;
-                    if(framesCount && frames >= framesCount) break;
-                    if(renderVal) break;
-
+                    if(framesCount && frames >= framesCount) {
+                        _break = true;
+                        break;
+                    }
+                    if(renderVal) {
+                        _break = true;
+                        break;
+                    }
                 }
+                if(_break) break;
             }
+            if(_break) break;
         }
         return renderVal;
     }
@@ -71,9 +78,6 @@ export class Animator {
             return
         }
         const animation = this.animation()
-        const x = 0
-        const y = 0
-        const z = 0 
         let renderVal = undefined
         this._cameraPosition = caneraPosition
         this._cameraDirection = caneraDirection
@@ -84,7 +88,7 @@ export class Animator {
         else renderVal = this.iterate(
             this.bounds, 
             animation, 
-            this.renderFunc)
+            this.renderFunc, framesCount)
         if(!this._stop && !renderVal) animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount))
         this._time += 1
     }

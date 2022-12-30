@@ -29,18 +29,21 @@ describe('Animator', () => {
         let count = 0
         const animator = new Animator(document, 'canvas', bounds, () => () => 0, (context: any, x: number, y: number, z: number, value: number, time: number) => {
             count++
-            return false
+            return true
         })
     })
-    it('should iterate random', () => {
+    it('should iterate random', (done) => {
         const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
         let count = 0
         const animator = new Animator(document, 'canvas', bounds, () => () => 0, (context: any, x: number, y: number, z: number, value: number, time: number) => {
             count++
-            return false
+            expect(count).to.be.greaterThan(0)
+            return true
         })
-        animator.iterateRandom(bounds, () => 0, () => false)
-        expect(count).to.be.greaterThan(0)
+        animator.iterateRandom(bounds, () => 0, () => {
+            done()
+            return true;
+        })
     })
     it('should animate', (done) => {
         const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
@@ -70,3 +73,4 @@ describe('Animator', () => {
         });
     })
 });
+
