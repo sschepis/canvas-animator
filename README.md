@@ -6,13 +6,13 @@ This is a simple library for creating 3D animations in the browser using canvas.
 ## Installation
 
 ```bash
-npm install 3d-canvas-animation
+npm install @sschepis/canvas-animator
 ```
 
 ## Usage
 
 ```typescript
-import { Animator, Bounds, Vector3 } from '3d-canvas-animation'
+import { Animator, Bounds, Vector3 } from '@sschepis/canvas-animator'
 
 const bounds = new Bounds(new Vector3(-10, -10, -10), new Vector3(10, 10, 10))
 const animation = () => {
