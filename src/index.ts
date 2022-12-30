@@ -13,6 +13,7 @@ const animatorFunc = (callback: any) => {
         setTimeout(callback, 1000 / 60);
     }
 }
+const random = (min: number, max: number) => Math.random() * (max - min) + min
 class Animator {
     _stop: boolean = false;
     _canvas: any;
@@ -61,9 +62,9 @@ class Animator {
         let renderVal = false, frames = 0;
         const size = bounds.max.x * bounds.max.y * bounds.max.z
         for(let i = 0; i < size; i++) {
-            const x = Math.floor(Math.random() * bounds.max.x)
-            const y = Math.floor(Math.random() * bounds.max.y)
-            const z = Math.floor(Math.random() * bounds.max.z)
+            const x = random(bounds.min.x, bounds.max.x)
+            const y = random(bounds.min.y, bounds.max.y)
+            const z = random(bounds.min.z, bounds.max.z)
             const result = iteratorFunc(x, y, z)
             renderVal = renderFunc(this._context, x, y, z, result, this._time);
             frames++;
