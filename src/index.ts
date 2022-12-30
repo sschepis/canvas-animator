@@ -60,7 +60,9 @@ class Animator {
     }
     iterateRandom(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount: number = 0) {
         let renderVal = false, frames = 0;
-        const size = bounds.max.x * bounds.max.y * bounds.max.z
+        const size = (bounds.max.x - bounds.min.x) 
+            * (bounds.max.y - bounds.min.y) 
+            * (bounds.max.z - bounds.min.z)
         for(let i = 0; i < size; i++) {
             const x = random(bounds.min.x, bounds.max.x)
             const y = random(bounds.min.y, bounds.max.y)

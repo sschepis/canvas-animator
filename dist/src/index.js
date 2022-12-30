@@ -19,6 +19,7 @@ const animatorFunc = (callback) => {
         setTimeout(callback, 1000 / 60);
     }
 };
+const random = (min, max) => Math.random() * (max - min) + min;
 class Animator {
     constructor(document, canvas, bounds, animation, renderFunc, randomCoords = false) {
         this.document = document;
@@ -43,7 +44,7 @@ class Animator {
         let renderVal = false, frames = 0, _break = false;
         for (let x = bounds.min.x; x < bounds.max.x; x++) {
             for (let y = bounds.min.y; y < bounds.max.y; y++) {
-                for (let z = bounds.min.z; z < bounds.max.x; z++) {
+                for (let z = bounds.min.z; z < bounds.max.z; z++) {
                     const result = iteratorFunc(x, y, z);
                     renderVal = renderFunc(this._context, x, y, z, result, this._time);
                     frames++;
@@ -66,11 +67,13 @@ class Animator {
     }
     iterateRandom(bounds, iteratorFunc, renderFunc, framesCount = 0) {
         let renderVal = false, frames = 0;
-        const size = bounds.max.x * bounds.max.y * bounds.max.z;
+        const size = (bounds.max.x - bounds.min.x)
+            * (bounds.max.y - bounds.min.y)
+            * (bounds.max.z - bounds.min.z);
         for (let i = 0; i < size; i++) {
-            const x = Math.floor(Math.random() * bounds.max.x);
-            const y = Math.floor(Math.random() * bounds.max.y);
-            const z = Math.floor(Math.random() * bounds.max.z);
+            const x = random(bounds.min.x, bounds.max.x);
+            const y = random(bounds.min.y, bounds.max.y);
+            const z = random(bounds.min.z, bounds.max.z);
             const result = iteratorFunc(x, y, z);
             renderVal = renderFunc(this._context, x, y, z, result, this._time);
             frames++;
@@ -81,7 +84,7 @@ class Animator {
         }
         return renderVal;
     }
-    animate(caneraPosition, caneraDirection, framesCount = 0) {
+    animate(caneraPosition, caneraDirection, framesCount = 0, loop = true) {
         if (!this._context) {
             if (!this._stop)
                 animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount));
@@ -95,7 +98,7 @@ class Animator {
             renderVal = this.iterateRandom(this.bounds, animation, this.renderFunc, framesCount);
         else
             renderVal = this.iterate(this.bounds, animation, this.renderFunc, framesCount);
-        if (!this._stop && !renderVal)
+        if (!this._stop && !renderVal && loop)
             animatorFunc(() => this.animate(caneraPosition, caneraDirection, framesCount));
         this._time += 1;
     }

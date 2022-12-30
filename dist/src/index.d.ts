@@ -22,7 +22,7 @@ declare class Animator {
     constructor(document: any, canvas: string, bounds: Bounds, animation: animationStartFunc, renderFunc: renderFunc, randomCoords?: boolean);
     iterate(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount?: number): boolean;
     iterateRandom(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount?: number): boolean;
-    animate(caneraPosition: Vector3, caneraDirection: Vector3, framesCount?: number): void;
+    animate(caneraPosition: Vector3, caneraDirection: Vector3, framesCount?: number, loop?: boolean): void;
     stop(): void;
 }
 export { Vector3, Vector2, Animator, Bounds, animationFunc, renderFunc, animationStartFunc };
