@@ -1,4 +1,3 @@
-
 import { expect } from 'chai';
 import { Vector3 } from '../src/vector';
 import { Bounds, Animator, renderFunc } from '../src/index';
@@ -8,69 +7,120 @@ class DocumentMock {
         return {
             getContext: () => {
                 return {
-                    translate: () => {}
-                }
-            }
-        }
+                    translate: () => {},
+                };
+            },
+        };
     }
 }
 const document = new DocumentMock() as any;
 
-const dummyRenderFunc: renderFunc = (context: any, x: number, y: number, z: number, value: number, time: number) => false;
+const dummyRenderFuncDeliverer = (done?: any) => {
+    return  (
+        context: any,
+        position: Vector3,
+        camera: Vector3,
+        direction: Vector3,
+        value: number,
+        time: number
+    ) => {
+        if(done) done();
+        return { render: true, break: false };
+    };
+}
 
 describe('Animator', () => {
-    it('should instantiate', () => {
-        const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
-        const animator = new Animator(document, 'canvas', bounds, () => () => 0, (context: any, x: number, y: number, z: number, value: number, time: number) => false)
-        expect(animator).to.be.instanceOf(Animator)
-    })
-    it('should iterate', () => {
-        const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
-        let count = 0
-        const animator = new Animator(document, 'canvas', bounds, () => () => 0, (context: any, x: number, y: number, z: number, value: number, time: number) => {
-            count++
-            return true
-        })
-    })
+    it('should initialize', () => {
+        const bounds = new Bounds(
+            new Vector3(0, 0, 0),
+            new Vector3(100, 100, 100)
+        );
+        const animator = new Animator(
+            document,
+            'canvas',
+            bounds,
+            () => [],
+            dummyRenderFuncDeliverer()
+        );
+        expect(animator).to.be.instanceOf(Animator);
+    });
+    it('should iterate', (done) => {
+        const bounds = new Bounds(
+            new Vector3(0, 0, 0),
+            new Vector3(100, 100, 100)
+        );
+        const animator = new Animator(
+            document,
+            'canvas',
+            bounds,
+            () => [],
+            dummyRenderFuncDeliverer(done)
+        );
+        let count = 0;
+        animator.iterate(
+            bounds,
+            (x: number, y: number, z: number) => {
+                count++;
+                return true;
+            },
+            dummyRenderFuncDeliverer(done)
+        );
+        expect(count).to.equal(1000000);
+    });
     it('should iterate random', (done) => {
-        const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
-        let count = 0
-        const animator = new Animator(document, 'canvas', bounds, () => () => 0, (context: any, x: number, y: number, z: number, value: number, time: number) => {
-            count++
-            expect(count).to.be.greaterThan(0)
-            return true
-        })
-        animator.iterateRandom(bounds, () => 0, () => {
-            done()
-            return true;
-        })
-    })
-    it('should animate', (done) => {
-        const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
-        let count = 0
-        const animator = new Animator(document, 'canvas', bounds, () => () => 0,  (context: any, x: number, y: number, z: number, value: number, time: number) => {
-            count++
-            return false
-        })
-        animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 1)
-        setTimeout(() => {
-            expect(count).to.be.greaterThan(0)
-            done()
-        }, 100)
-    })
-    it('should stop', (done) => {
-        const bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10, 10, 10))
-        let count = 0
-        const animator = new Animator(document, 'canvas', bounds, () => () => 0,  (context: any, x: number, y: number, z: number, value: number, time: number) => {
-            count++
-            return false
-        })
-        animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 1)
-        animator.stop()
-        setTimeout(() => {
-            expect(count).to.equal(1)
-            done()
-        });
-    })
+        const bounds = new Bounds(
+            new Vector3(0, 0, 0),
+            new Vector3(100, 100, 100)
+        );
+        const animator = new Animator(
+            document,
+            'canvas',
+            bounds,
+            () => [],
+            dummyRenderFuncDeliverer(done)
+        );
+        let count = 0;
+        animator.iterateRandom(
+            bounds,
+            (x: number, y: number, z: number) => {
+                count++;
+                return true;
+            },
+            dummyRenderFuncDeliverer(done)
+        );
+        expect(count).to.equal(1000000);
+    });
+    it('should animate', () => {
+        const bounds = new Bounds(
+            new Vector3(0, 0, 0),
+            new Vector3(100, 100, 100)
+        );
+        const animator = new Animator(
+            document,
+            'canvas',
+            bounds,
+            () => [],
+            dummyRenderFuncDeliverer()
+        );
+        let count = 0;
+        animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 0, false);
+        expect(count).to.equal(0);
+    });
+    it('should stop', () => {
+        const bounds = new Bounds(
+            new Vector3(0, 0, 0),
+            new Vector3(100, 100, 100)
+        );
+        const animator = new Animator(
+            document,
+            'canvas',
+            bounds,
+            () => [],
+            dummyRenderFuncDeliverer()
+        );
+        let count = 0;
+        animator.stop();
+        animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 0, false);
+        expect(count).to.equal(0);
+    });
 });
-

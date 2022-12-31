@@ -5,256 +5,255 @@ A small library for creating 3D animations in the browser using the canvas eleme
 ## Install
 
 ```bash
-npm install 3d-canvas
+npm install @sschepis/canvas-animator
 ```
-
 ## Usage
 
 ```typescript
-import { Animator, animationFunc, renderFunc } from '3d-canvas'
+import {
+  Vector3,
+  Vector2,
+  Animator,
+  Bounds,
+  animationFunc,
+  renderFunc,
+  animationStartFunc
+} from "./animator";
 
-const canvas: string = 'canvas'
-const bounds = new Bounds(
-    new Vector3(-100, -100, -100), 
-    new Vector3(100, 100, 100)
-)
-const animation: animationFunc = (x: number, y: number, z: number) => {
-    return x + y + z
-}
-const renderFunc: renderFunc = (context: CanvasRenderingContext2D, x: number, y: number, z: number, value: number, time: number) => {
-    context.fillStyle = '#000'
-    context.fillRect(x, y, 1, 1)
-    return false
-}
+const bounds = new Bounds(new Vector3(-200, -200, -200), new Vector3(200, 200, 200));
+
+const animation: animationStartFunc = () => {
+  const animations: animationFunc[] = [];
+  const animation1: animationFunc = (x, y, z) => {
+    return Math.sin(x / 100) * Math.sin(y / 100) * Math.sin(z / 100) * 100;
+  };
+  animations.push(animation1);
+  return animations;
+};
+
+const render: renderFunc = (context, position, camera, direction, value, time) => {
+  const render = false;
+  const breakLoop = false;
+  const cameraPosition = camera;
+  const cameraDirection = direction;
+  const cameraDistance = cameraPosition.distance(position);
+  const cameraAngle = cameraDirection.angle(position);
+  if (cameraDistance < value) {
+    const x = position.x - cameraPosition.x;
+    const y = position.y - cameraPosition.y;
+    const z = position.z - cameraPosition.z;
+    const x2 = x * Math.cos(cameraAngle.x) - z * Math.sin(cameraAngle.x);
+    const z2 = x * Math.sin(cameraAngle.x) + z * Math.cos(cameraAngle.x);
+    const y2 = y * Math.cos(cameraAngle.y) - z2 * Math.sin(cameraAngle.y);
+    const z3 = y * Math.sin(cameraAngle.y) + z2 * Math.cos(cameraAngle.y);
+    const x3 = x2 * Math.cos(cameraAngle.z) - y2 * Math.sin(cameraAngle.z);
+    const y3 = x2 * Math.sin(cameraAngle.z) + y2 * Math.cos(cameraAngle.z);
+    const x4 = x3 + cameraPosition.x;
+    const y4 = y3 + cameraPosition.y;
+    const z4 = z3 + cameraPosition.z;
+    const distance = Math.sqrt(x4 * x4 + y4 * y4 + z4 * z4);
+    const angle = Math.atan2(y4, x4);
+    const size = 1 / distance;
+    context.beginPath();
+    context.arc(
+      Math.cos(angle) * distance,
+      Math.sin(angle) * distance,
+      size,
+      0,
+      2 * Math.PI
+    );
+    context.fillStyle = `rgba(255,255,255,${size})`;
+    context.fill();
+  }
+  return breakLoop;
+};
+
 const animator = new Animator(
-    document, 
-    canvas, 
-    bounds, 
-    animation, 
-    renderFunc
-)
-animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0))
-```
+  bounds,
+  animation,
+  render,
+  document.getElementById("canvas") as HTMLCanvasElement
+);
 
+animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 1000, true);
+```
 ## Diagrams
 
 ### Class Diagram
 
+(omitting Vector2 and Vector3's methods)
 ```mermaid
 classDiagram
-    class Bounds {
-        +min: Vector3
-        +max: Vector3
-        +constructor(min: Vector3, max: Vector3)
-        +contains(vector: Vector3): boolean
+    class Animator {
+    _stop: boolean
+    _canvas: any
+    _context: any
+    _time: number
+    _cameraPosition: Vector3
+    _cameraDirection: Vector3
+    constructor(document: any, canvas: string, bounds: Bounds, animation: animationStartFunc, renderFunc: renderFunc, randomCoords: boolean, step: number)
+    iterate(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount: number, step: number)
+    iterateRandom(bounds: Bounds, iteratorFunc: any, renderFunc: any, framesCount: number)
+    animate(caneraPosition: Vector3, caneraDirection: Vector3, framesCount: number, loop: boolean)
+    stop()
     }
     class Vector3 {
-        +x: number
-        +y: number
-        +z: number
-        +constructor(x: number, y: number, z: number)
-        +add(vector: Vector3): Vector3
-        +sub(vector: Vector3): Vector3
-        +mul(vector: Vector3): Vector3
-        +div(vector: Vector3): Vector3
-        +length(): number
-        +normalize(): Vector3
-        +dot(vector: Vector3): number
-        +cross(vector: Vector3): Vector3
-        +equals(vector: Vector3): boolean
-        +toString(): string
+    x: number
+    y: number
+    z: number
     }
-    class Animator {
-        +canvas: HTMLCanvasElement
-        +context: CanvasRenderingContext2D
-        +bounds: Bounds
-        +renderFunc: renderFunc
-        +constructor(canvas: HTMLCanvasElement, bounds: Bounds, renderFunc: renderFunc)
-        +iterate(bounds: Bounds, valueFunc: valueFunc, renderFunc: renderFunc): void
-        +iterateRandom(bounds: Bounds, valueFunc: valueFunc, renderFunc: renderFunc): void
-        +animate(start: Vector3, end: Vector3, duration: number): void
-        +stop(): void
+    class Vector2 {
+    x: number
+    y: number
+    }
+    class Bounds {
+    min: Vector3
+    max: Vector3
+    constructor(min: Vector3, max: Vector3)
+    }
+    class animationFunc {
+    x: number
+    y: number
+    z: number
     }
     class renderFunc {
-        +context: any
-        +x: number
-        +y: number
-        +z: number
-        +value: number
-        +time: number
-        +(): boolean
+    context: any
+    position: Vector3
+    cameraPosition: Vector3
+    cameraDirection: Vector3
+    result: any
+    time: number
     }
-    class valueFunc {
-        +x: number
-        +y: number
-        +z: number
-        +(): number
+    class animationStartFunc {
+    context: any
+    bounds: Bounds
+    cameraPosition: Vector3
+    cameraDirection: Vector3
+    time: number
     }
-    Animator --|> Bounds
+
     Animator --|> Vector3
+    Animator --|> Vector2
+    Animator --|> Bounds
+    Animator --|> animationFunc
     Animator --|> renderFunc
-    Animator --|> valueFunc
-    Animator --|> DocumentMock
-    Animator --|> HTMLCanvasElement
-    Animator --|> CanvasRenderingContext2D
-    renderFunc --|> valueFunc
+    Animator --|> animationStartFunc
+    Vector3 --|> Vector2
+    Bounds --|> Vector3
+    Bounds --|> Vector2
+    animationFunc --|> Vector3
     renderFunc --|> Vector3
-    renderFunc --|> Bounds
-    valueFunc --|> Vector3
-    valueFunc --|> Bounds
-    Vector3 --|> Bounds
+    renderFunc --|> Vector2
+    animationStartFunc --|> Vector3
+    animationStartFunc --|> Vector2
+    animationStartFunc --|> Bounds
+
 ```
+
 ### Sequence Diagram
+
 
 ```mermaid
 sequenceDiagram
     participant A as Animator
-    participant B as Bounds
-    participant V as Vector3
-    participant R as renderFunc
-    participant V as valueFunc
-    participant D as DocumentMock
-    participant C as HTMLCanvasElement
-    participant C as CanvasRenderingContext2D
-    A->>B: new Bounds(min, max)
-    A->>V: new Vector3(x, y, z)
-    A->>R: new renderFunc()
-    A->>V: new valueFunc()
-    A->>D: new DocumentMock()
-    A->>C: new HTMLCanvasElement()
-    A->>C: new CanvasRenderingContext2D()
-    A->>A: new Animator(canvas, bounds, renderFunc)
-    A->>B: contains(vector)
-    A->>V: add(vector)
-    A->>V: sub(vector)
-    A->>V: mul(vector)
-    A->>V: div(vector)
-    A->>V: length()
-    A->>V: normalize()
-    A->>V: dot(vector)
-    A->>V: cross(vector)
-    A->>V: equals(vector)
-    A->>V: toString()
-    A->>A: iterate(bounds, valueFunc, renderFunc)
-    A->>A: iterateRandom(bounds, valueFunc, renderFunc)
-    A->>A: animate(start, end, duration)
-    A->>A: stop()
+    participant C as Canvas
+    participant D as Document
 
+    A->>D: document.getElementById
+    Note right of A: if the canvas is not found, the animation will not start
+    A->>A: _canvas
+    A->>A: _context
+    Note right of A: if the context is not found, the animation will not start
+    A->>C: translate
+
+    activate A
+    A->>A: animate
+    Note right of A: if the stop flag is set, the animation will stop
+    A->>A: _time
+    A->>A: _cameraPosition
+    A->>A: _cameraDirection
+    A->>A: animation
+    A->>A: renderFunc
+    A->>A: randomCoords
+    A->>A: step
+    A->>A: iterate
+    A->>A: iterateRandom
+    A->>A: random
+    deactivate A
+    Note right of A: if the renderVal is true, the animation will stop
+    Note right of A: if the framesCount is set, the animation will stop
+    Note right of A: if the loop is set, the animation will stop
+    Note right of A: if the stop flag is set, the animation will stop
+    Note right of A: if the renderVal is true, the animation will stop
 ```
+
 
 ## API
 
-### Animation
+### Vector3
+...
 
-An animation is a function that returns a value for a given set of coordinates. The function signature is `(x: number, y: number, z: number) => number`
-
-### Render
-
-A render function is a function that is called for each point in the animation. The function signature is `(context: CanvasRenderingContext2D, x: number, y: number, z: number, value: number, time: number) => boolean`
-
-The render function takes the following parameters:
-
-- `context` - The canvas context
-- `x` - The x coordinate of the current point
-- `y` - The y coordinate of the current point
-- `z` - The z coordinate of the current point
-- `value` - The value of the point as returned by the animation function
-- `time` - The current time of the animation
-
-The render function should return a boolean value indicating if the animation should stop.
-
-### Animator
-
-The animator class is used to create and run the animation. It takes the following parameters:
-
-- `document` - The document object
-- `canvas` - The id of the canvas element
-- `bounds` - The bounds of the animation
-- `animation` - The animation function
-- `renderFunc` - The render function
-
-#### animate
-
-The animate method starts the animation. It takes the following parameters:
-
-- `caneraPosition` - The position of the camera
-- `caneraDirection` - The direction of the camera
-- `framesCount` - The number of frames to render per animation frame. If this value is not set, all frames will be rendered per animation frame.
-
-#### stop
-
-The stop method stops the animation.
+### Vector2
+...
 
 ### Bounds
 
-The bounds class is used to define the bounds of the animation. It takes the following parameters:
+```typescript
+class Bounds {
+  min: Vector3;
+  max: Vector3;
+  constructor(min: Vector3, max: Vector3);
+}
+```
 
-- `min` - The minimum bounds
-- `max` - The maximum bounds
+### animationFunc
 
-#### min
+```typescript
+type animationFunc = (x: number, y: number, z: number) => number;
+```
 
-The min property is a Vector3 object that defines the minimum bounds.
+### renderFunc
 
-#### max
+```typescript
+type renderFunc = (
+  context: CanvasRenderingContext2D,
+  position: Vector3,
+  camera: Vector3,
+  direction: Vector3,
+  value: number,
+  time: number
+) => boolean;
 
-The max property is a Vector3 object that defines the maximum bounds.
+```
 
-### Vector3
+### animationStartFunc
 
-The vector3 class is used to define a point in 3D space. It takes the following parameters:
+```typescript
+type animationStartFunc = () => animationFunc[];
+```
 
-- `x` - The x coordinate of the point
-- `y` - The y coordinate of the point
-- `z` - The z coordinate of the point
+### Animator
 
-### Vector3.distance
+```typescript
+class Animator {
 
-The distance method returns the distance between two points.
+  constructor(
+    bounds: Bounds,
+    animation: animationStartFunc,
+    renderFunc: renderFunc,
+    context: CanvasRenderingContext2D
+  );
 
-### Vector3.rotate
+  animate(
+    caneraPosition: Vector3,
+    caneraDirection: Vector3,
+    framesCount: number = 0,
+    loop: boolean = true
+  ): void;
 
-The rotate method rotates a point around another point.
-
-### Vector3.normalize
-
-The normalize method normalizes the vector.
-
-### Vector3.add
-
-The add method adds two vectors.
-
-### Vector3.subtract
-
-The subtract method subtracts two vectors.
-
-### Vector3.multiply
-
-The multiply method multiplies a vector by a scalar.
-
-### Vector3.divide
-
-The divide method divides a vector by a scalar.
-
-### Vector3.dot
-
-The dot method returns the dot product of two vectors.
-
-### Vector3.cross
-
-The cross method returns the cross product of two vectors.
-
-### Vector3.equals
-
-The equals method returns a boolean indicating if two vectors are equal.
-
-### Vector3.fromArray
-
-The fromArray method returns a vector from an array.
-
-### Vector3.toArray
-
-The toArray method returns an array from a vector.
+  stop(): void;
+}
+```
 
 ## License
 

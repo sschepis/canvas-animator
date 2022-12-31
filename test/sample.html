@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sample</title>
+</head>
+<body>
+<script src="../dist/src/index"></script>
+<script type="text/javascript">
+    const {
+        Vector3,
+        Vector2,
+        Animator,
+        Bounds,
+        animationFunc,
+        renderFunc,
+        animationStartFunc
+    } = require( "../dist/src/index" );
+    const bounds = new Bounds(new Vector3(-200, -200, -200), new Vector3(200, 200, 200));
+
+    const animation = () => {
+    const animations = [];
+    const animation1 = (x, y, z) => {
+        return Math.sin(x / 100) * Math.sin(y / 100) * Math.sin(z / 100) * 100;
+    };
+    animations.push(animation1);
+    return animations;
+    };
+
+    const render = (context, position, camera, direction, value, time) => {
+    const render = false;
+    const breakLoop = false;
+    const cameraPosition = camera;
+    const cameraDirection = direction;
+    const cameraDistance = cameraPosition.distance(position);
+    const cameraAngle = cameraDirection.angle(position);
+    if (cameraDistance < value) {
+        const x = position.x - cameraPosition.x;
+        const y = position.y - cameraPosition.y;
+        const z = position.z - cameraPosition.z;
+        const x2 = x * Math.cos(cameraAngle.x) - z * Math.sin(cameraAngle.x);
+        const z2 = x * Math.sin(cameraAngle.x) + z * Math.cos(cameraAngle.x);
+        const y2 = y * Math.cos(cameraAngle.y) - z2 * Math.sin(cameraAngle.y);
+        const z3 = y * Math.sin(cameraAngle.y) + z2 * Math.cos(cameraAngle.y);
+        const x3 = x2 * Math.cos(cameraAngle.z) - y2 * Math.sin(cameraAngle.z);
+        const y3 = x2 * Math.sin(cameraAngle.z) + y2 * Math.cos(cameraAngle.z);
+        const x4 = x3 + cameraPosition.x;
+        const y4 = y3 + cameraPosition.y;
+        const z4 = z3 + cameraPosition.z;
+        const distance = Math.sqrt(x4 * x4 + y4 * y4 + z4 * z4);
+        const angle = Math.atan2(y4, x4);
+        const size = 1 / distance;
+        context.beginPath();
+        context.arc(
+        Math.cos(angle) * distance,
+        Math.sin(angle) * distance,
+        size,
+        0,
+        2 * Math.PI
+        );
+        context.fillStyle = `rgba(255,255,255,${size})`;
+        context.fill();
+    }
+    return breakLoop;
+    };
+
+    const animator = new Animator(
+        bounds,
+        animation,
+        render,
+        document.getElementById("canvas")
+    );
+
+    animator.animate(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 1000, true);
+</script>
+</body>
+</html>
