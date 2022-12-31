@@ -8,66 +8,59 @@ class DocumentMock {
         return {
             getContext: () => {
                 return {
-                    translate: () => { }
+                    translate: () => { },
                 };
-            }
+            },
         };
     }
 }
 const document = new DocumentMock();
-const dummyRenderFunc = (context, x, y, z, value, time) => false;
+const dummyRenderFuncDeliverer = (done) => {
+    return (context, position, camera, direction, value, time) => {
+        if (done)
+            done();
+        return { render: true, break: false };
+    };
+};
 describe('Animator', () => {
-    it('should instantiate', () => {
-        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(10, 10, 10));
-        const animator = new index_1.Animator(document, 'canvas', bounds, () => () => 0, (context, x, y, z, value, time) => false);
+    it('should initialize', () => {
+        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(100, 100, 100));
+        const animator = new index_1.Animator(document, 'canvas', bounds, () => [], dummyRenderFuncDeliverer());
         (0, chai_1.expect)(animator).to.be.instanceOf(index_1.Animator);
     });
-    it('should iterate', () => {
-        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(10, 10, 10));
+    it('should iterate', (done) => {
+        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(100, 100, 100));
+        const animator = new index_1.Animator(document, 'canvas', bounds, () => [], dummyRenderFuncDeliverer(done));
         let count = 0;
-        const animator = new index_1.Animator(document, 'canvas', bounds, () => () => 0, (context, x, y, z, value, time) => {
+        animator.iterate(bounds, (x, y, z) => {
             count++;
             return true;
-        });
+        }, dummyRenderFuncDeliverer(done));
+        (0, chai_1.expect)(count).to.equal(1000000);
     });
     it('should iterate random', (done) => {
-        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(10, 10, 10));
+        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(100, 100, 100));
+        const animator = new index_1.Animator(document, 'canvas', bounds, () => [], dummyRenderFuncDeliverer(done));
         let count = 0;
-        const animator = new index_1.Animator(document, 'canvas', bounds, () => () => 0, (context, x, y, z, value, time) => {
+        animator.iterateRandom(bounds, (x, y, z) => {
             count++;
-            (0, chai_1.expect)(count).to.be.greaterThan(0);
             return true;
-        });
-        animator.iterateRandom(bounds, () => 0, () => {
-            done();
-            return true;
-        });
+        }, dummyRenderFuncDeliverer(done));
+        (0, chai_1.expect)(count).to.equal(1000000);
     });
-    it('should animate', (done) => {
-        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(10, 10, 10));
+    it('should animate', () => {
+        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(100, 100, 100));
+        const animator = new index_1.Animator(document, 'canvas', bounds, () => [], dummyRenderFuncDeliverer());
         let count = 0;
-        const animator = new index_1.Animator(document, 'canvas', bounds, () => () => 0, (context, x, y, z, value, time) => {
-            count++;
-            return false;
-        });
-        animator.animate(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(0, 0, 0), 1);
-        setTimeout(() => {
-            (0, chai_1.expect)(count).to.be.greaterThan(0);
-            done();
-        }, 100);
+        animator.animate(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(0, 0, 0), 0, false);
+        (0, chai_1.expect)(count).to.equal(0);
     });
-    it('should stop', (done) => {
-        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(10, 10, 10));
+    it('should stop', () => {
+        const bounds = new index_1.Bounds(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(100, 100, 100));
+        const animator = new index_1.Animator(document, 'canvas', bounds, () => [], dummyRenderFuncDeliverer());
         let count = 0;
-        const animator = new index_1.Animator(document, 'canvas', bounds, () => () => 0, (context, x, y, z, value, time) => {
-            count++;
-            return false;
-        });
-        animator.animate(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(0, 0, 0), 1);
         animator.stop();
-        setTimeout(() => {
-            (0, chai_1.expect)(count).to.equal(1);
-            done();
-        });
+        animator.animate(new vector_1.Vector3(0, 0, 0), new vector_1.Vector3(0, 0, 0), 0, false);
+        (0, chai_1.expect)(count).to.equal(0);
     });
 });
